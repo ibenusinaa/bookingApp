@@ -1,4 +1,4 @@
-import React from 'react'
+import React,  { useState } from 'react'
 import { Text, TextInput, View } from 'react-native'
 
 
@@ -6,22 +6,22 @@ import typography from '../../Support/Styles/typography'
 import spacing from '../../Support/Styles/spacing'
 import color from '../../Support/Styles/color'
 import { Button, Form, Icon, Input, Item, Label, Footer, Content, Row, Grid} from 'native-base'
-import { useState } from 'react'
 
-const SignIn = ({navigation: {navigate}}) => {
+import {onUserLogin} from './../../Redux/Actions/UserAction'
+import { connect } from 'react-redux'
+
+
+const SignIn = ({navigation: {navigate}, onUserLogin, user}) => {
 
     const [inputEmail, setInputEmail] = useState('')
+    const [inputPassword, setInputPassword] = useState('')
     const [error, setError] = useState('')
 
-    const onEmailValidation = (input) => {
-        console.log(input)
-        let regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
-
-        if(regex.test(input)){
-            setInputEmail(input)
-            setError('')
+    const submitLogin = () => {
+        if(inputEmail === '' || inputPassword === ''){
+            return setError('Email dan password harus diisi')
         }else{
-            setError('Email Tidak Valid')
+            onUserLogin(inputEmail, inputPassword)
         }
     }
 
@@ -47,7 +47,7 @@ const SignIn = ({navigation: {navigate}}) => {
                                 <Item stackedLabel>
                                     <Label style={{...typography.fsTwelve, ...color.light, marginLeft: -28}}>Email/Phone Number</Label>
                                     <Icon type='FontAwesome' name='user' style={{marginLeft: 10}} />
-                                    <Input name='email' onChangeText={(input) => {onEmailValidation(input)}} />
+                                    <Input name='email' onChangeText={(input) => {setInputEmail(input)}} />
                                 </Item>
                             </Form>
                         </Row>
@@ -56,7 +56,7 @@ const SignIn = ({navigation: {navigate}}) => {
                                 <Item stackedLabel>
                                     <Label style={{...typography.fsTwelve, ...color.light, marginLeft: -28}}>Password</Label>
                                     <Icon type='FontAwesome' name='lock' style={{marginLeft: 10}} />
-                                    <Input secureTextEntry={true}/>
+                                    <Input secureTextEntry={true} onChangeText={(input) => {setInputPassword(input)}}/>
                                 </Item>
                             </Form>
                         </Row>
@@ -68,6 +68,16 @@ const SignIn = ({navigation: {navigate}}) => {
                             :
                                 null
                         }
+                         {
+                            user.error?
+                                <Text style={{...typography.fsTwelve, ...spacing.mtTwo, color: 'red', textAlign: 'center'}}>
+                                    {user.error}
+                                </Text>
+                        
+                        
+                            :
+                                    null
+                        }
                       
                         <Text style={{...typography.fsTwelve, ...spacing.myTwo, color: 'blue', textAlign: 'right'}}>
                             Forgot Password?
@@ -78,11 +88,24 @@ const SignIn = ({navigation: {navigate}}) => {
                     <Grid style={{...spacing.mxThree, marginTop: 50, alignItems: 'center'}}>
                         <Row>
                             <Row style={{width: '100%'}}>
-                                <Button rounded info style={{width: '100%'}}>
-                                    <Text style={{color: 'white', width: '100%', textAlign: 'center'}}>
-                                        Sign in
-                                    </Text>                        
+                            {
+                            user.loading?
+                                <Button disabled rounded info style={{width: '100%'}}>
+                                    <View style={{alignItems:'center', width: '100%'}}>
+                                        <Text style={{color: 'white'}}>
+                                            Please Wait...
+                                        </Text>
+                                    </View>
                                 </Button>
+                            :
+                                <Button disabled={inputEmail === '' || inputPassword === '' || error !== ''? true : false} onPress = {submitLogin} rounded info style={{width: '100%'}}>
+                                    <View style={{alignItems:'center', width: '100%'}}>
+                                        <Text style={{color: 'white'}}>
+                                            Sign in
+                                        </Text>
+                                    </View>
+                                </Button>
+                        }
                             </Row>
                         </Row>
                         <Text style={{...spacing.myFive}}>
@@ -124,4 +147,14 @@ const SignIn = ({navigation: {navigate}}) => {
     )
 }
 
-export default SignIn
+const mapDispatchToProps = {
+    onUserLogin
+}
+
+const mapStateToProps = (state) => {
+    return{
+        user: state.user
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(SignIn)

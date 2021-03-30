@@ -5,7 +5,7 @@ const secondary = '#f4d160'
 const light = '#bbbbbb'
 const dark = '#1e212d'
 const link = '#3366BB'
-
+const grey = '#616161'
 const color = StyleSheet.create({
     bgPrimary: {backgroundColor: primary},
     primary: {color: primary},
@@ -18,6 +18,9 @@ const color = StyleSheet.create({
 
     bgDark: {backgroundColor: dark},
     dark: {color: dark},
+
+    bgGrey: {backgroundColor: grey},
+    grey: {color: grey},
 
     link: {color: link},
 

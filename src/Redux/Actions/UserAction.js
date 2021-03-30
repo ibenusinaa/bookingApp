@@ -16,7 +16,7 @@ export const onUserRegister = (inputEmail, inputPassword) => {
             if(res.data.length === 1){
                 dispatch(
                     {
-                        type: 'REGISTER_FAILED',
+                        type: 'AUTH_FAILED',
                         payload: 'Email Sudah Terdaftar'
                     }
                 )
@@ -27,7 +27,7 @@ export const onUserRegister = (inputEmail, inputPassword) => {
                     .then((reAsyncStorage) => {
                         dispatch(
                             {
-                                type: 'REGISTER_SUCCESS',
+                                type: 'AUTH_SUCCESS',
                                 payload: response.data.id
                             }
                            
@@ -52,7 +52,7 @@ export const onSaveAsyncStorage = (id) => {
     return(dispatch) => {
         dispatch(
             {
-                type: 'REGISTER_SUCCESS',
+                type: 'AUTH_SUCCESS',
                 payload: id
             }
         )
@@ -68,6 +68,47 @@ export const onUserLogout = () => {
                     type: 'LOGOUT_SUCCESS'
                 }
             )
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+    }
+}
+
+export const onUserLogin = (inputEmail, inputPassword) => {
+    return(dispatch) => {
+
+        dispatch(
+            {
+                type: 'LOADING'
+            }
+        )
+        
+        Axios.get(linkAPI + '/users?email=' + inputEmail + '&password=' + inputPassword)
+        .then((resp) => {
+            if(resp.data.length === 1){
+                AsyncStorage.setItem('@id', (resp.data[0].id).toString())
+                .then((reAsyncStorage) => {
+                    dispatch(
+                        {
+                            type: 'AUTH_SUCCESS',
+                            payload: resp.data[0].id
+                        }
+                    )
+                })
+                .catch((errAsyncStorage) => {
+                    console.log(errAsyncStorage)
+                })
+
+                
+            }else{
+                dispatch(
+                    {
+                        type: 'AUTH_FAILED',
+                        payload: 'Email atau Password Salah'
+                    }
+                )
+            }
         })
         .catch((err) => {
             console.log(err)

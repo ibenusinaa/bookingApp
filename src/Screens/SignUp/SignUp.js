@@ -32,7 +32,17 @@ const SignUp = ({navigation: {navigate}, onUserRegister, user}) => {
 
     const onPasswordValidation = (input) => {
         console.log(input)
-        let symbol = /[!@#$%^&*]/
+        let symbol = /[!@$%^*]/
+        let notSymbol = /[&#]/
+
+        if(notSymbol.test(input)){
+            return setError('Symbol Yang Diperbolehkan : !@$%^*')
+        }
+
+        if(symbol.test(input[input.length-1])){
+            return setError('Symbol Tidak Boleh Diakhir')
+        }
+
         if(input.length < 6){
             return setError('Password Minimal 6 Karakter')
         }
@@ -128,10 +138,10 @@ const SignUp = ({navigation: {navigate}, onUserRegister, user}) => {
                     <View style={{width: '100%'}}>
                         {
                             user.loading?
-                                <Button disabled onPress = {submitRegister} rounded info style={{width: '100%'}}>
+                                <Button disabled rounded info style={{width: '100%'}}>
                                     <View style={{alignItems:'center', width: '100%'}}>
                                         <Text style={{color: 'white'}}>
-                                            test loading
+                                            Please Wait...
                                         </Text>
                                     </View>
                                 </Button>

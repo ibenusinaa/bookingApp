@@ -10,10 +10,9 @@ const userReducer = (state = initialState, action) => {
             return {...state, loading: true}
         case 'LOGOUT_SUCCESS':
             return {id: '', error: '', loading: null}
-        case 'REGISTER_SUCCESS':
-            console.log('testing reducer')
+        case 'AUTH_SUCCESS':
             return {id: action.payload, error: '', loading: null}
-        case 'REGISTER_FAILED':
+        case 'AUTH_FAILED':
             return {...state, error: action.payload, loading: null}
         default: 
         return state

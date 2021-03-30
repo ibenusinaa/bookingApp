@@ -11,13 +11,16 @@ import {applyMiddleware, createStore} from 'redux'
 import {Provider} from 'react-redux'
 import thunk from 'redux-thunk'
 import allReducer from './src/Redux/Reducers/index'
+import { Root } from 'native-base';
 
 const store = createStore(allReducer, applyMiddleware(thunk))
 
 const Index = () => {
     return(
         <Provider store={store}>
-            <App />
+            <Root>
+                <App />
+            </Root>
         </Provider>
         
     )

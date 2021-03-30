@@ -1,48 +1,88 @@
-import { Button, Body, Col, Content, Form, Grid, Header, Input, Item, Label, Picker, Title, Left, Right } from 'native-base'
+import { Button, Body, Col, Content, Form, Grid, Header, Input, Item, Label, Picker, Title, Left, Right, Container, Accordion } from 'native-base'
 import React from 'react'
 import { View, Text } from 'react-native'
-import { useState } from 'react/cjs/react.development'
-import DatePicker from 'react-native-datepicker'
+import { useEffect, useState } from 'react/cjs/react.development'
+import RNDateTimePicker from 'react-native-datepicker'
+import Collapsible from 'react-native-collapsible';
 
 import spacing from './../../Support/Styles/spacing'
 import color from './../..//Support/Styles/color'
 
-const Home = () => {
+import {onSetArrival} from './../../Redux/Actions/FilterAction'
+import {onSetDeparture} from './../../Redux/Actions/FilterAction'
+import {onSetSeat} from './../../Redux/Actions/FilterAction'
+import {onSetDate} from './../../Redux/Actions/FilterAction'
+import { connect } from 'react-redux'
+
+const Home = ({navigation:{navigate}, onSetArrival, onSetDeparture, onSetDate, onSetSeat, filter}) => {
 
     const [jumlahSeat, setJumlahSeat] = useState('1')
-    const [tanggal, setTanggal] = useState(new Date())
+    const [error, setError] = useState('')
+    
+    useEffect(() => {
+        onSetSeat(jumlahSeat)
+    }, [])
+
+    const submitFilter= () => {
+        if(filter.departure === null || filter.arrival === null || filter.date === null){
+            setError('Kamu belum mengisi semua inputan')
+        }else{
+            // onSetDate(tanggal)
+            // onSetSeat(jumlahSeat)
+            setError('')
+            navigate('ShuttleList', {data: filter})
+        }
+        
+    }
+
+    const pushSeat = (itemValue) => {
+        setJumlahSeat(itemValue)
+        onSetSeat(itemValue)
+    }
+
+    const dataArray = [
+        { title: "Askumboyceksound", content: 'testing12'},
+        { title: 'Askumboyceksound2', content: 'testing124'}
+    ]
 
     return(
         <Content>
-            <View style={{...spacing.mFive, backgroundColor: 'white'}}>
+            
+            <Header style={{backgroundColor: 'white'}}>   
+                <Body style={{alignItems: 'center'}}>
+                    <Title style={{color: 'black'}}>Bus App</Title>
+                </Body> 
+            </Header>
+
+            <View style={{...spacing.mFive, backgroundColor: 'white', borderRadius: 3, elevation: 1}}>
                <Form>
                    <Item stackedLabel>
                        <Label>Mulai Dari</Label>
-                       <Input />
+                       <Input onChangeText={onSetDeparture}/>
 
                    </Item>
                </Form>
                <Form>
                    <Item stackedLabel>
                        <Label>Kota Tujuan</Label>
-                       <Input />
+                       <Input onChangeText={onSetArrival}/>
                    </Item>
                </Form>
             </View>
-            <Grid style={{...spacing.mFive, backgroundColor: 'white'}}>
+            <Grid style={{...spacing.mFive, backgroundColor: 'white', borderRadius: 3, elevation: 1}}>
                 <Col>
                     <Form>
                         <Item stackedLabel>
                             <Label>Tanggal Perjalanan</Label>
-                            <DatePicker
+                            <RNDateTimePicker
                                 style={{width: 200, marginTop: 10}}
-                                date={tanggal}
+                                date={filter.date}
                                 minDate={new Date()}
                                 mode="date"
+                                placeholder="Pilih Tanggal"
                                 format="DD-MM-YYYY"
                                 confirmBtnText="Confirm"
                                 cancelBtnText="Cancel"
-                                
                                 customStyles={{
                                 dateIcon: {
                                     position: 'absolute',
@@ -57,7 +97,7 @@ const Home = () => {
                                 }
                                 // ... You can check the source to find the other keys.
                                 }}
-                                onDateChange={(date) => {setTanggal(date)}}
+                                onDateChange={(date) => {onSetDate(date)}}
                             />
                         </Item>
                     </Form>
@@ -67,9 +107,10 @@ const Home = () => {
                         <Item stackedLabel>
                             <Label>Jumlah Seat</Label>
                             <Picker
+                                placeholder='Jumlah Seat'
                                 selectedValue={jumlahSeat}
                                 style={{ height: 50, width: 150 }}
-                                onValueChange={(itemValue, itemIndex) => setJumlahSeat(itemValue)}
+                                onValueChange={(itemValue) => pushSeat(itemValue)}
                             >
                                 <Picker.Item label="1" value="1" />
                                 <Picker.Item label="2" value="2" />
@@ -81,8 +122,16 @@ const Home = () => {
                     </Form>
                 </Col>
             </Grid>
-            <View style={{...spacing.mThree}}>
-                <Button rounded info style={{width: '100%', ...color.bgSecondary}}>
+            <View style={{...spacing.mbThree, ...spacing.mxFive}}>
+                {
+                    error?
+                        <Text style={{color: 'red', textAlign:'center', ...spacing.mbTwo}}>
+                            {error}
+                        </Text>
+                    :
+                        null
+                }
+                <Button onPress={submitFilter} rounded info style={{width: '100%', ...color.bgSecondary}}>
                     <Text style={{color: 'black', width: '100%', textAlign: 'center'}}>
                         Cari Bus
                     </Text>                        
@@ -94,4 +143,14 @@ const Home = () => {
     )
 }
 
-export default Home
+const mapDispatchToProps = {
+    onSetArrival, onSetDeparture, onSetDate, onSetSeat
+}
+
+const mapStateToProps = (state) => {
+    return{
+        filter: state.filter
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Home)

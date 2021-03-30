@@ -19,7 +19,9 @@ const typography = StyleSheet.create({
     fsTwenty: {fontSize: Six},
     fsTwentyFour: {fontSize: Seven},
     fsTwentyEight: {fontSize: Eight},
-    fsThirty: {fontSize: Nine}
+    fsThirty: {fontSize: Nine},
+
+    fsBold: {fontWeight: 'bold'}
 })
 
 export default typography

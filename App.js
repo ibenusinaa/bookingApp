@@ -6,26 +6,26 @@
  * @flow strict-local
  */
 
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {NavigationContainer} from '@react-navigation/native'
 import RegisterRouter from './routes/RegisterRouter'
 import MainRouter from './routes/MainRouter'
 import {onSaveAsyncStorage} from './src/Redux/Actions/UserAction'
 
+
 // Redux
-import {applyMiddleware, createStore} from 'redux'
 import {connect} from 'react-redux'
-import thunk from 'redux-thunk'
-import allReducer from './src/Redux/Reducers/index'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const store = createStore(allReducer, applyMiddleware(thunk))
+// Splash
+import Splash from './src/Screens/Splash/Splash'
 
 const App = ({user, onSaveAsyncStorage}) => {
 
+  const [isLogin, setIsLogin] = useState(false)
+
   useEffect(() => {
-    console.log(user.id)
     getAsyncStorageData()
   }, [])
 
@@ -33,10 +33,17 @@ const App = ({user, onSaveAsyncStorage}) => {
     AsyncStorage.getItem('@id')
     .then((result) => {
       onSaveAsyncStorage(result)
+      return setIsLogin(true)
     })
     .catch((err) => {
       console.log(err)
     })
+  }
+
+  if(isLogin === false){
+    return(
+      <Splash />
+    )
   }
   return (
 
@@ -47,8 +54,7 @@ const App = ({user, onSaveAsyncStorage}) => {
           :
             <RegisterRouter />
         }
-     
-        {/* <MainRouter /> */}
+
       </NavigationContainer>
  
   )
@@ -60,7 +66,8 @@ const mapDispatchToProps = {
 
 const mapStateToProps = (state) => {
   return{
-    user: state.user
+    user: state.user,
+    login: state.login
   }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(App);
