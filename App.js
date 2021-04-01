@@ -12,6 +12,7 @@ import {NavigationContainer} from '@react-navigation/native'
 import RegisterRouter from './routes/RegisterRouter'
 import MainRouter from './routes/MainRouter'
 import {onSaveAsyncStorage} from './src/Redux/Actions/UserAction'
+import OneSignal from 'react-native-onesignal'
 
 
 // Redux
@@ -25,8 +26,15 @@ const App = ({user, onSaveAsyncStorage}) => {
 
   const [isLogin, setIsLogin] = useState(false)
 
-  useEffect(() => {
+  useEffect(async() => {
     getAsyncStorageData()
+
+    OneSignal.setAppId("dd35c0b2-cf6e-448a-ad82-bbc2b211096f");
+    OneSignal.setLogLevel(6, 0);
+    OneSignal.setRequiresUserPrivacyConsent(false);
+    OneSignal.promptForPushNotificationsWithUserResponse(response => {
+        console.log("Prompt response:", response);
+    });
   }, [])
 
   const getAsyncStorageData = () => {

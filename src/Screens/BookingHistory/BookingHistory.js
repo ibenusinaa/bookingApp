@@ -1,19 +1,38 @@
-import { Body, Header, Col, Content, Grid, Icon, Text, Row, Container, Title, Button } from 'native-base'
+import { Body, Header, Col, Content, Grid, Icon, Text, Row, Container, Title, Button, Spinner } from 'native-base'
 import React, {useEffect, useState, useRef} from 'react'
 import { TouchableOpacity, View } from 'react-native'
 
 import spacing from './../../Support/Styles/spacing'
 import color from './../../Support/Styles/color'
 import typography from '../../Support/Styles/typography'
-import {getPurchaseHistory} from '../../Redux/Actions/TransactionAction'
+import {getPurchaseHistory, getExpiredAt} from '../../Redux/Actions/TransactionAction'
 import { connect } from 'react-redux'
+import moment from 'moment'
 
-const BookingHistory = ({getPurchaseHistory, user, purchaseHistory, navigation: {navigate}}) => {
+const BookingHistory = ({getPurchaseHistory, user, purchaseHistory, getExpiredAt, navigation: {navigate}}) => {
 
 
     useEffect(() => {
         getPurchaseHistory(user.id)
     }, [])
+
+    const payNow = (expiredAt, id) => {
+        let now = moment(new Date()).utcOffset('+07.00').format('YYYY-MM-DD HH:mm:ss')
+        let different = moment.duration(moment(expiredAt).diff(moment(now)))
+
+        let seconds = different.asSeconds()
+        console.log(seconds)
+        getExpiredAt(seconds)
+        navigate('Payment', {idTransaction: id})
+    }
+
+    if(purchaseHistory.purchaseHistory === null){
+        return(
+            <View stlye={{alignItems: 'center', justifyContent: 'center'}}>
+                <Spinner color='blue' />
+            </View>
+        )
+    }
 
     return(
         <Container>
@@ -24,7 +43,7 @@ const BookingHistory = ({getPurchaseHistory, user, purchaseHistory, navigation: 
             </Header>
             <Content>
             {
-                purchaseHistory.purchaseHistory?
+                purchaseHistory.purchaseHistory.length > 0?
                     purchaseHistory.purchaseHistory.map((value, index) => {
                         return(       
                             <View key={index} style={{...spacing.mtFive,  ...spacing.mxFive, borderColor: 'grey', borderWidth: 0.3, borderRadius: 3, elevation: 2, backgroundColor: 'white'}}>
@@ -49,7 +68,7 @@ const BookingHistory = ({getPurchaseHistory, user, purchaseHistory, navigation: 
                                     {
                                         value.status === 'Unpaid'?
                                             <Col>
-                                                <TouchableOpacity onPress={() => navigate('Payment', {idTransaction: value.id})} style={{height: 30}} >
+                                                <TouchableOpacity onPress={() => payNow(value.expiredAt, value.id)} style={{height: 30}} >
                                                     <Text style={{fontStyle: 'italic', ...color.primary}}>
                                                         Pay Now?
                                                     </Text>
@@ -89,13 +108,18 @@ const BookingHistory = ({getPurchaseHistory, user, purchaseHistory, navigation: 
                                     <Text>
                                         {value.name}
                                     </Text>
+                                    <Text>
+                                        Expired at: {value.expiredAt}
+                                    </Text>
                                 </View>
                             </View>  
                         )
                     })
                     
                 :
-                    null
+                    <Text>
+                       Kamu belum melakukan pembelian
+                    </Text>
             }
             </Content>
         </Container>
@@ -104,7 +128,7 @@ const BookingHistory = ({getPurchaseHistory, user, purchaseHistory, navigation: 
 }
 
 const mapDispatchToProps = {
-    getPurchaseHistory
+    getPurchaseHistory, getExpiredAt
 }
 
 const mapStateToProps = (state) => {

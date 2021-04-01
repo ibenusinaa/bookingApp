@@ -10,9 +10,10 @@ import moment from 'moment'
 import Axios from 'axios'
 
 import {linkAPI} from '../../Support/Constants/linkAPI'
+import {getPurchaseHistory, getExpiredAt} from '../../Redux/Actions/TransactionAction'
 
 
-const BookingDetail = ({route, navigation: {navigate}, navigation, user, filter}) => {
+const BookingDetail = ({route, navigation: {navigate}, navigation, user, filter, getPurchaseHistory, getExpiredAt}) => {
 
     const [selectedSeat, setSelectedSeat] = useState([])
     const [passenger, setPassenger] = useState([])
@@ -79,7 +80,13 @@ const BookingDetail = ({route, navigation: {navigate}, navigation, user, filter}
         // seat : selectedSeat (state)
         // detailPassenger : passenger (state)
         // totalPrice : route.params.price
-        let expiredAt = moment(new Date()).add({minutes: 15}).utcOffset('+07:00').format('YYYY-MM-DD HH:mm:ss')
+        let expiredAt = moment(new Date()).add({seconds: 20}).utcOffset('+07:00').format('YYYY-MM-DD HH:mm:ss')
+        let now = moment(new Date()).utcOffset('+07.00').format('YYYY-MM-DD HH:mm:ss')
+        let different = moment.duration(moment(expiredAt).diff(moment(now)))
+
+        let seconds = different.asSeconds()
+
+
         
 
         let dataToSend = {
@@ -104,8 +111,10 @@ const BookingDetail = ({route, navigation: {navigate}, navigation, user, filter}
                     duration: 4000
                 })
             }else{
+                getExpiredAt(seconds)
                 Axios.post(linkAPI + '/transactions', {...dataToSend} )
                 .then((res) => {
+                    getPurchaseHistory(user.id)
                     navigate('Payment', {idTransaction: res.data.id})
                 })
                 .catch((err) => {
@@ -140,7 +149,7 @@ const BookingDetail = ({route, navigation: {navigate}, navigation, user, filter}
                         <Form>
                             <Item stackedLabel>
                                 <Label style={{...color.dark}} style={{...color.dark}}>Email</Label>
-                                <Input style={{width: '100%'}} onChangeText={(input) => setKontakUser({...kontakUser, email: (input)})} />
+                                <Input placeholder={user.email} style={{width: '100%'}} onChangeText={(input) => setKontakUser({...kontakUser, email: (input)})} />
                             </Item>
                         </Form>
                     
@@ -214,10 +223,14 @@ const BookingDetail = ({route, navigation: {navigate}, navigation, user, filter}
     )
 }
 
+const mapDispatchToProps = {
+    getPurchaseHistory, getExpiredAt
+}
+
 const mapStateToProps = (state) => {
     return{
         user:  state.user,
         filter: state.filter
     }
 }
-export default connect(mapStateToProps, '')(BookingDetail)
+export default connect(mapStateToProps, mapDispatchToProps)(BookingDetail)

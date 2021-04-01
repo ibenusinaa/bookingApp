@@ -1,7 +1,8 @@
 let initialState = {
     id: '',
     error: '',
-    loading: null
+    loading: null,
+    email: null,
 }
 
 const userReducer = (state = initialState, action) => {
@@ -11,7 +12,7 @@ const userReducer = (state = initialState, action) => {
         case 'LOGOUT_SUCCESS':
             return {id: '', error: '', loading: null}
         case 'AUTH_SUCCESS':
-            return {id: action.payload, error: '', loading: null}
+            return {id: action.payload, error: '', email: action.another, loading: null}
         case 'AUTH_FAILED':
             return {...state, error: action.payload, loading: null}
         default: 

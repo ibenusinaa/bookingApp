@@ -350,26 +350,26 @@
       "id": 3
     },
     {
-      "idShuttle": 1,
-      "status": "Cancelled",
-      "expiredAt": "2021-03-30 09:34:10",
+      "idShuttle": 4,
+      "status": "Paid",
+      "expiredAt": "",
       "idUser": "1",
-      "name": "Pahala Kencana",
+      "name": "Jackal Holiday",
       "class": "Executive",
       "from": "Bandung",
-      "to": "Surabaya",
-      "departureDate": "31-03-2021",
+      "to": "Tangerang",
+      "departureDate": "14-04-2021",
       "seat": [
-        "6C"
+        "1A"
       ],
       "detailPassenger": [
         {
-          "seat": "6C",
+          "seat": "1A",
           "nama": "asd",
           "umur": "asd"
         }
       ],
-      "totalPrice": 275000,
+      "totalPrice": 125000,
       "id": 4
     }
   ]

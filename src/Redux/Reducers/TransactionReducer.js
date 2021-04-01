@@ -1,6 +1,7 @@
 let initialState = {
     dataTransaction: null,
-    purchaseHistory: null
+    purchaseHistory: null,
+    expiredAt: null
 }
 
 const transactionReducer = (state = initialState, action) => {
@@ -9,6 +10,8 @@ const transactionReducer = (state = initialState, action) => {
             return {...state, dataTransaction: action.payload }
         case 'GET_PURCHASE_HISTORY_SUCCESS':
             return {...state, purchaseHistory: action.payload}
+        case 'GET_EXPIREDAT':
+            return{...state, expiredAt:action.payload}
         default:
             return state
     }

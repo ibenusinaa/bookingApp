@@ -36,3 +36,10 @@ export const getPurchaseHistory = (id) => {
         })
     }
 }
+
+export const getExpiredAt = (expiredAt) => {
+    return{
+        type: 'GET_EXPIREDAT',
+        payload: expiredAt
+    }
+}

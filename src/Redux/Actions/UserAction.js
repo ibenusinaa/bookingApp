@@ -29,6 +29,10 @@ export const onUserRegister = (inputEmail, inputPassword) => {
                             {
                                 type: 'AUTH_SUCCESS',
                                 payload: response.data.id
+                            },
+                            {
+                                type: 'EMAIL_STORED',
+                                payload: response.data.email
                             }
                            
                         )
@@ -87,12 +91,14 @@ export const onUserLogin = (inputEmail, inputPassword) => {
         Axios.get(linkAPI + '/users?email=' + inputEmail + '&password=' + inputPassword)
         .then((resp) => {
             if(resp.data.length === 1){
+                console.log(resp.data[0])
                 AsyncStorage.setItem('@id', (resp.data[0].id).toString())
                 .then((reAsyncStorage) => {
                     dispatch(
                         {
                             type: 'AUTH_SUCCESS',
-                            payload: resp.data[0].id
+                            payload: resp.data[0].id,
+                            another: resp.data[0].email
                         }
                     )
                 })

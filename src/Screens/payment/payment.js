@@ -1,4 +1,4 @@
-import { Accordion, Body, Button, Col, Container, Content, Grid, Header, Icon, Row, Text, Title, View } from 'native-base'
+import { Accordion, Body, Button, Col, Container, Content, Grid, Header, Icon, Row, Spinner, Text, Title, View } from 'native-base'
 import React, {useEffect, useState} from 'react'
 import { Image } from 'react-native'
 import { connect } from 'react-redux'
@@ -8,44 +8,25 @@ import typography from '../../Support/Styles/typography'
 import CountDown from 'react-native-countdown-component';
 import moment from 'moment'
 
-import {getDataTransaction} from './../../Redux/Actions/TransactionAction'
+import {getDataTransaction, getPurchaseHistory} from './../../Redux/Actions/TransactionAction'
 import axios from 'axios'
 import { linkAPI } from '../../Support/Constants/linkAPI'
 
 
-const Payment = ({navigation, route, getDataTransaction, transaction}) => {
-
-    const [countExpired, setCountExpired] = useState(null)
+const Payment = ({navigation, route, getDataTransaction, transaction, user,  getPurchaseHistory}) => {
 
     useEffect(() => {
         getDataTransaction(route.params.idTransaction)
         
-        if(transaction.dataTransaction){
-            expiredTransanctions()
-            console.log('masuk useEffect')
-        }
         
     }, [])
-
-    const expiredTransanctions = () => {
-        console.log('masuk ke expired')
-        let expiredAt = transaction.dataTransaction.expiredAt
-        let now = moment(new Date()).utcOffset('+07.00').format('YYYY-MM-DD HH:mm:ss')
-        let different = moment.duration(moment(expiredAt).diff(moment(now)))
-        console.log(expiredAt + 'expired')
-        console.log(now + 'sekarang')
-        console.log(different)
-        let seconds = different.asSeconds()
-        console.log(seconds + 'detik')
-
-        setCountExpired(seconds)
-    }
 
     const onFinish = () => {
         alert('Pesananmu kami batalkan karena melewati waktu pembayaran')
         axios.patch(linkAPI + `/transactions/${route.params.idTransaction}`, {status: 'Cancelled'})
         .then((res) => {
-            console.log(res)
+            getPurchaseHistory(user.id)
+            getDataTransaction(route.params.idTransaction)
         })
         .catch((err) => {
             console.log(err)
@@ -55,6 +36,7 @@ const Payment = ({navigation, route, getDataTransaction, transaction}) => {
     const onPayment = () => {
         axios.patch(linkAPI + `/transactions/${route.params.idTransaction}`, {status: 'Paid', expiredAt: ''})
         .then((res) => {
+            getPurchaseHistory(user.id)
             getDataTransaction(route.params.idTransaction)
         })
         .catch((err) => {
@@ -66,11 +48,8 @@ const Payment = ({navigation, route, getDataTransaction, transaction}) => {
         console.log(countExpired)
     }
 
-    const dataArray=[
-        { title: 'Details', content: 'Masih belum'}
-    ]
 
-    if(transaction.dataTransaction === null && countExpired === null){
+    if(transaction.dataTransaction === null){
         return(
             <Container>
             <Header style={{...color.bgSecondary}}>
@@ -88,9 +67,9 @@ const Payment = ({navigation, route, getDataTransaction, transaction}) => {
                 </Body>
             </Header>
             <Content>
-                <Text style={{textAlign: 'center', ...typography.fsFive}}>
-                    Loading
-                </Text>
+                <View style={{alignItems: 'center', justifyContent: 'center', ...spacing.mtFive}}>
+                    <Spinner color = 'blue' />
+                </View>
             </Content>
             </Container>
         )
@@ -149,28 +128,19 @@ const Payment = ({navigation, route, getDataTransaction, transaction}) => {
                                     {
                                         transaction.dataTransaction.status === 'Unpaid'?
                                             <CountDown 
-                                                until={countExpired? countExpired : 90}
+                                                until={transaction.expiredAt}
                                                 onFinish={onFinish}
                                                 timeLabels={{m: null, s: null}}
                                                 timeToShow={['M', 'S']}
                                                 size={18}
                                             />
                                         :
-                                            <Text>
-                                                Paid
-                                            </Text>
+                                            null
                                     }
                                     
                                 </View>
                             </Col>
                         </Grid>
-                        <View style={{...spacing.mxFive}}>
-                            <Accordion
-                                style={{zIndex: 0}} 
-                                headerStyle={{...color.bgSecondary}}
-                                contentStyle={{...color.bgSecondary}}
-                                dataArray={dataArray} expanded={[0]} />
-                        </View>
                     </View>
                     <View style={{...spacing.mFive}}>
                         <Row style={{alignItems : 'center'}}>
@@ -217,18 +187,18 @@ const Payment = ({navigation, route, getDataTransaction, transaction}) => {
                             </Col>
                         </Row>   
                     </Grid>
-                    <View style={{...spacing.mFive}}>
-                        <Button block onPress={onPayment}>
-                            <Text>
-                                Pay Now
-                            </Text>
-                        </Button>
-                        <Button block onPress={onCheck}>
-                            <Text>
-                                Check Expired
-                            </Text>
-                        </Button>
-                    </View>
+                    {
+                        transaction.dataTransaction.status === 'Unpaid'?
+                            <View style={{...spacing.mFive}}>
+                                <Button block onPress={onPayment}>
+                                    <Text>
+                                        Pay Now
+                                    </Text>
+                                </Button>                     
+                            </View>
+                        :
+                            null
+                    }
                 </Content>
             </Container>
         </>
@@ -236,12 +206,14 @@ const Payment = ({navigation, route, getDataTransaction, transaction}) => {
 }
 
 const mapDispatchToProps = {
-    getDataTransaction
+    getDataTransaction,
+    getPurchaseHistory
 }
 
 const mapStateToProps = (state) => {
     return{
-        transaction: state.transaction
+        transaction: state.transaction,
+        user: state.user
     }
 }
 
